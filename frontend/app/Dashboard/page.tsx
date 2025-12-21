@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import Navbar from "@/components/Navbar"
 import { Briefcase, Map, MessageSquare, TrendingUp, Calendar, Building2 } from "lucide-react"
 
 // Mock recent activity data
@@ -49,7 +50,14 @@ const recentActivity = [
 export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-background">
+      <Navbar />
+
       <div className="container mx-auto px-6 py-8">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold mb-2">Dashboard</h1>
+          <p className="text-muted-foreground">Track your internship journey and progress</p>
+        </div>
+
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card>

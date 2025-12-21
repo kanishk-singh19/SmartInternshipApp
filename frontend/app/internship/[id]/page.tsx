@@ -1,96 +1,161 @@
-"use client";
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import Navbar from "@/components/Navbar"
+import { Calendar, Building2, MapPin, DollarSign, Sparkles, MessageSquare, ArrowLeft } from "lucide-react"
 
-import { useParams } from "next/navigation";
-import { internships } from "../../data/internships";
-import { useState } from "react";
+// Mock data - in a real app this would be fetched based on the id
+const internshipData = {
+  1: {
+    role: "Frontend Developer Intern",
+    company: "TechCorp Inc.",
+    location: "San Francisco, CA",
+    type: "Remote",
+    stipend: "$2,500/month",
+    skills: ["React", "TypeScript", "Tailwind CSS", "Git", "REST APIs", "Responsive Design"],
+    deadline: "March 15, 2025",
+    description: `Join our dynamic frontend team and help build cutting-edge web applications that serve millions of users. You'll work alongside experienced developers and gain hands-on experience with modern web technologies.`,
+    responsibilities: [
+      "Develop responsive user interfaces using React and TypeScript",
+      "Collaborate with designers to implement pixel-perfect designs",
+      "Write clean, maintainable, and well-documented code",
+      "Participate in code reviews and agile ceremonies",
+      "Optimize applications for maximum speed and scalability",
+    ],
+    requirements: [
+      "Currently pursuing a degree in Computer Science or related field",
+      "Strong understanding of HTML, CSS, and JavaScript",
+      "Experience with React and modern frontend frameworks",
+      "Familiarity with version control systems (Git)",
+      "Excellent problem-solving and communication skills",
+    ],
+  },
+}
 
 export default function InternshipDetailPage() {
-  const { id } = useParams();
-  const internship = internships.find((i) => i.id === id);
-
-  const [userSkills, setUserSkills] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState("");
-
-  if (!internship) {
-    return <p className="p-6">Internship not found</p>;
-  }
-
-  const handleGenerate = async () => {
-    setLoading(true);
-    setResult("");
-
-    const res = await fetch("http://localhost:5000/api/ai/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        internship: {
-          role: internship.role,
-          company: internship.company,
-          requiredSkills: internship.skills,
-          deadline: internship.deadline,
-        },
-        userSkills: userSkills.split(",").map((s) => s.trim()),
-      }),
-    });
-
-    const data = await res.json();
-    setResult(data.data?.plan || "No response");
-    setLoading(false);
-  };
+  const internship = internshipData[1] // In real app: internshipData[params.id]
 
   return (
-    <main className="max-w-4xl mx-auto px-6 py-8 space-y-6">
-      <div className="bg-white border rounded-xl p-6 shadow-sm">
-        <h1 className="text-2xl font-semibold">
-          {internship.role}
-        </h1>
+    <div className="min-h-screen bg-background">
+      <Navbar />
 
-        <p className="text-gray-500 mt-1">
-          {internship.company} • {internship.location}
-        </p>
+      <div className="container mx-auto px-6 py-8">
+        <Button asChild variant="ghost" className="mb-6">
+          <Link href="/internships">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Internships
+          </Link>
+        </Button>
 
-        <p className="mt-4 text-gray-600">
-          {internship.description}
-        </p>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6">
+            <div>
+              <div className="flex items-start gap-4 mb-4">
+                <div className="h-16 w-16 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Building2 className="h-8 w-8 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h1 className="text-4xl font-bold mb-2">{internship.role}</h1>
+                  <p className="text-xl text-muted-foreground">{internship.company}</p>
+                </div>
+              </div>
 
-        <p className="mt-4 text-sm text-gray-600">
-          <strong>Required Skills:</strong>{" "}
-          {internship.skills.join(", ")}
-        </p>
+              <div className="flex flex-wrap gap-4 text-sm">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <MapPin className="h-4 w-4" />
+                  <span>
+                    {internship.location} · {internship.type}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <DollarSign className="h-4 w-4" />
+                  <span>{internship.stipend}</span>
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Calendar className="h-4 w-4" />
+                  <span>Deadline: {internship.deadline}</span>
+                </div>
+              </div>
+            </div>
 
-        <p className="mt-2 text-sm text-gray-600">
-          <strong>Deadline:</strong>{" "}
-          {internship.deadline}
-        </p>
-      </div>
+            <Card>
+              <CardHeader>
+                <h2 className="text-2xl font-semibold">About the Role</h2>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <p className="text-muted-foreground leading-relaxed">{internship.description}</p>
 
-      <div className="bg-white border rounded-xl p-6 shadow-sm">
-        <h2 className="font-semibold mb-2">
-          Your Current Skills
-        </h2>
+                <div>
+                  <h3 className="font-semibold mb-3">Key Responsibilities</h3>
+                  <ul className="space-y-2">
+                    {internship.responsibilities.map((item, index) => (
+                      <li key={index} className="flex gap-3 text-sm text-muted-foreground leading-relaxed">
+                        <span className="text-primary mt-1">•</span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
 
-        <input
-          className="w-full border rounded-lg p-2"
-          placeholder="HTML, CSS"
-          value={userSkills}
-          onChange={(e) => setUserSkills(e.target.value)}
-        />
+                <div>
+                  <h3 className="font-semibold mb-3">Requirements</h3>
+                  <ul className="space-y-2">
+                    {internship.requirements.map((item, index) => (
+                      <li key={index} className="flex gap-3 text-sm text-muted-foreground leading-relaxed">
+                        <span className="text-primary mt-1">•</span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-        <button
-          onClick={handleGenerate}
-          disabled={loading}
-          className="mt-4 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"
-        >
-          {loading ? "Generating..." : "Generate AI Roadmap"}
-        </button>
-      </div>
+          {/* Sidebar */}
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <h3 className="font-semibold">Required Skills</h3>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  {internship.skills.map((skill) => (
+                    <Badge key={skill} variant="secondary">
+                      {skill}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
 
-      {result && (
-        <div className="bg-gray-900 text-green-400 p-6 rounded-xl whitespace-pre-wrap text-sm">
-          {result}
+            <Card className="border-primary/20 bg-primary/5">
+              <CardHeader>
+                <h3 className="font-semibold">AI-Powered Tools</h3>
+                <p className="text-sm text-muted-foreground">
+                  Prepare for this internship with personalized AI assistance
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button className="w-full justify-start" size="lg">
+                  <Sparkles className="mr-2 h-5 w-5" />
+                  Generate AI Roadmap
+                </Button>
+                <Button className="w-full justify-start bg-transparent" variant="outline" size="lg">
+                  <MessageSquare className="mr-2 h-5 w-5" />
+                  View Interview Questions
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Button className="w-full" size="lg" variant="default">
+              Apply Now
+            </Button>
+          </div>
         </div>
-      )}
-    </main>
-  );
+      </div>
+    </div>
+  )
 }
