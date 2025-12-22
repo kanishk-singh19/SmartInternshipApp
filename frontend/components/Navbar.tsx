@@ -27,13 +27,13 @@ export function Navbar() {
 
             <div className="hidden md:flex items-center gap-1">
               <Button asChild variant="ghost">
-                <Link href="/internships">
+                <Link href="/internship">
                   <Briefcase className="mr-2 h-4 w-4" />
                   Internships
                 </Link>
               </Button>
               <Button asChild variant="ghost">
-                <Link href="/dashboard">
+                <Link href="/Dashboard">
                   <LayoutDashboard className="mr-2 h-4 w-4" />
                   Dashboard
                 </Link>
@@ -50,7 +50,7 @@ export function Navbar() {
           {/* Profile Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+              <Button className=" rounded-full">
                 <Avatar>
                   <AvatarFallback className="bg-primary text-primary-foreground">JD</AvatarFallback>
                 </Avatar>

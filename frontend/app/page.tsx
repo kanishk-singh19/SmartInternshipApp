@@ -1,147 +1,76 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Briefcase, Map, MessageSquare, TrendingUp, Calendar, Building2 } from "lucide-react"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { ArrowRight, Sparkles, Target, TrendingUp } from "lucide-react"
 
-// Mock recent activity data
-const recentActivity = [
-  {
-    id: 1,
-    type: "applied",
-    title: "Applied to Frontend Developer Intern",
-    company: "TechCorp Inc.",
-    date: "2 days ago",
-    icon: Briefcase,
-  },
-  {
-    id: 2,
-    type: "roadmap",
-    title: "Generated roadmap for React Skills",
-    company: "Self Study",
-    date: "3 days ago",
-    icon: Map,
-  },
-  {
-    id: 3,
-    type: "interview",
-    title: "Completed interview prep for Backend Engineer",
-    company: "DataFlow Systems",
-    date: "5 days ago",
-    icon: MessageSquare,
-  },
-  {
-    id: 4,
-    type: "saved",
-    title: "Saved ML Engineer Intern position",
-    company: "AI Innovations",
-    date: "1 week ago",
-    icon: Building2,
-  },
-  {
-    id: 5,
-    type: "applied",
-    title: "Applied to Full Stack Intern",
-    company: "StartupHub",
-    date: "1 week ago",
-    icon: Briefcase,
-  },
-]
-
-export default function DashboardPage() {
+export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-6 py-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Applied</CardTitle>
-              <Briefcase className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">12</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                <span className="text-primary">+3</span> from last week
-              </p>
-            </CardContent>
-          </Card>
+      {/* Hero Section */}
+      <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        {/* Subtle grid background */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:4rem_4rem]" />
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Roadmaps Generated</CardTitle>
-              <Map className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">8</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                <span className="text-primary">+2</span> from last week
-              </p>
-            </CardContent>
-          </Card>
+        {/* Content */}
+        <div className="relative z-10 container mx-auto px-6 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/50 border border-border mb-8">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <span className="text-sm text-muted-foreground">AI-Powered Career Planning</span>
+          </div>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Interviews Prepared</CardTitle>
-              <MessageSquare className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">15</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                <span className="text-primary">+5</span> from last week
-              </p>
-            </CardContent>
-          </Card>
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 text-balance">
+            Turn Internships Into a <span className="text-primary">Clear Career Roadmap</span>
+          </h1>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Skills Tracked</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">24</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                <span className="text-primary">+6</span> from last week
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-12 leading-relaxed text-balance">
+            Discover internships matched to your interests, understand required skills, and generate personalized
+            learning paths with AI-powered roadmaps and interview prep.
+          </p>
 
-        {/* Recent Activity */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Recent Activity</CardTitle>
-            <p className="text-sm text-muted-foreground">Your latest interactions and progress</p>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentActivity.map((activity) => {
-                const Icon = activity.icon
-                return (
-                  <div
-                    key={activity.id}
-                    className="flex items-start gap-4 p-4 rounded-lg border border-border hover:bg-accent/50 transition-colors"
-                  >
-                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <Icon className="h-5 w-5 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium leading-tight mb-1">{activity.title}</p>
-                      <p className="text-sm text-muted-foreground">{activity.company}</p>
-                    </div>
-                    <div className="flex flex-col items-end gap-2">
-                      <Badge variant="outline" className="text-xs">
-                        {activity.type}
-                      </Badge>
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground whitespace-nowrap">
-                        <Calendar className="h-3 w-3" />
-                        {activity.date}
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Button asChild size="lg" className="text-base px-8">
+              <Link href="/internship">
+                Get Started
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="text-base px-8 bg-transparent">
+              <Link href="/internship">Explore Internships</Link>
+            </Button>
+          </div>
+
+          {/* Feature highlights */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-24 max-w-4xl mx-auto">
+            <div className="flex flex-col items-center text-center p-6 rounded-lg bg-card border border-border">
+              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                <Target className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="font-semibold mb-2">Smart Discovery</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Find internships perfectly aligned with your career goals and skill level
+              </p>
             </div>
-          </CardContent>
-        </Card>
+
+            <div className="flex flex-col items-center text-center p-6 rounded-lg bg-card border border-border">
+              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                <TrendingUp className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="font-semibold mb-2">AI Roadmaps</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Generate personalized learning paths to master required skills
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center text-center p-6 rounded-lg bg-card border border-border">
+              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                <Sparkles className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="font-semibold mb-2">Interview Prep</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Get AI-generated questions tailored to each internship role
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )

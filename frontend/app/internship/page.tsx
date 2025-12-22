@@ -1,140 +1,146 @@
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import Navbar from "@/components/Navbar"
-import { Calendar, Building2, ArrowRight } from "lucide-react"
+"use client";
 
-// Mock internship data
-const internships = [
-  {
-    id: 1,
-    role: "Frontend Developer Intern",
-    company: "TechCorp Inc.",
-    skills: ["React", "TypeScript", "Tailwind CSS", "Git"],
-    deadline: "March 15, 2025",
-    description: "Build modern web applications using React and TypeScript",
-  },
-  {
-    id: 2,
-    role: "Backend Engineer Intern",
-    company: "DataFlow Systems",
-    skills: ["Node.js", "PostgreSQL", "REST APIs", "Docker"],
-    deadline: "March 20, 2025",
-    description: "Design and implement scalable backend services",
-  },
-  {
-    id: 3,
-    role: "Full Stack Intern",
-    company: "StartupHub",
-    skills: ["Next.js", "MongoDB", "Express", "AWS"],
-    deadline: "March 25, 2025",
-    description: "Work on full-stack features from database to UI",
-  },
-  {
-    id: 4,
-    role: "ML Engineer Intern",
-    company: "AI Innovations",
-    skills: ["Python", "TensorFlow", "PyTorch", "SQL"],
-    deadline: "March 30, 2025",
-    description: "Build and train machine learning models",
-  },
-  {
-    id: 5,
-    role: "Mobile Developer Intern",
-    company: "AppVentures",
-    skills: ["React Native", "JavaScript", "Firebase", "Redux"],
-    deadline: "April 5, 2025",
-    description: "Create cross-platform mobile applications",
-  },
-  {
-    id: 6,
-    role: "DevOps Intern",
-    company: "CloudTech Solutions",
-    skills: ["Kubernetes", "CI/CD", "Linux", "Terraform"],
-    deadline: "April 10, 2025",
-    description: "Manage infrastructure and deployment pipelines",
-  },
-]
+import { useState } from "react";
+import Link from "next/link";
 
-// Mock stats
-const stats = [
-  { label: "Applied", value: "12" },
-  { label: "Saved", value: "24" },
-  { label: "Roadmaps", value: "8" },
-]
+type Internship = {
+  id: string;
+  title: string;
+  company: string;
+  skills: string[];
+  deadline: string;
+};
+
+const mockInternships: Internship[] = [
+  {
+    id: "1",
+    title: "Frontend Developer Intern",
+    company: "Google",
+    skills: ["React", "JavaScript", "Tailwind"],
+    deadline: "15 Feb 2025",
+  },
+  {
+    id: "2",
+    title: "Backend Developer Intern",
+    company: "Amazon",
+    skills: ["Node.js", "Express", "MongoDB"],
+    deadline: "1 Mar 2025",
+  },
+  {
+    id: "3",
+    title: "Full Stack Intern",
+    company: "Microsoft",
+    skills: ["React", "Node.js", "SQL"],
+    deadline: "28 Feb 2025",
+  },
+];
 
 export default function InternshipsPage() {
+  const [search, setSearch] = useState("");
+
+  const filteredInternships = mockInternships.filter((internship) => {
+    const query = search.toLowerCase();
+    return (
+      internship.title.toLowerCase().includes(query) ||
+      internship.company.toLowerCase().includes(query) ||
+      internship.skills.join(" ").toLowerCase().includes(query)
+    );
+  });
+
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
+    <div className="p-6">
+      {/* Header */}
+      <h1 className="text-3xl font-bold mb-2">Available Internships</h1>
+      <p className="text-muted-foreground mb-6">
+        Explore internships and generate AI-powered learning roadmaps
+      </p>
 
-      <div className="container mx-auto px-6 py-8">
-        {/* Stats Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          {stats.map((stat) => (
-            <Card key={stat.label}>
-              <CardContent className="pt-6">
-                <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
-                <p className="text-3xl font-bold">{stat.value}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Discover Internships</h1>
-          <p className="text-muted-foreground">Find opportunities that match your skills and career goals</p>
-        </div>
-
-        {/* Internship Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {internships.map((internship) => (
-            <Card key={internship.id} className="flex flex-col hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-start gap-3 mb-3">
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <Building2 className="h-6 w-6 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-lg leading-tight mb-1">{internship.role}</h3>
-                    <p className="text-sm text-muted-foreground">{internship.company}</p>
-                  </div>
-                </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">{internship.description}</p>
-              </CardHeader>
-
-              <CardContent className="flex-1">
-                <div className="mb-4">
-                  <p className="text-xs font-medium text-muted-foreground mb-2">Required Skills</p>
-                  <div className="flex flex-wrap gap-2">
-                    {internship.skills.map((skill) => (
-                      <Badge key={skill} variant="secondary">
-                        {skill}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Calendar className="h-4 w-4" />
-                  <span>Deadline: {internship.deadline}</span>
-                </div>
-              </CardContent>
-
-              <CardFooter>
-                <Button asChild className="w-full" variant="default">
-                  <Link href={`/internships/${internship.id}`}>
-                    View Details
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
+      {/* Search Bar */}
+      <div className="max-w-md mb-6">
+        <input
+          type="text"
+          placeholder="Search by role, company, or skill..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="
+            w-full rounded-lg border border-border bg-background
+            px-4 py-2 text-sm focus:outline-none
+            focus:ring-2 focus:ring-primary
+          "
+        />
       </div>
+
+      {/* Internship Cards */}
+      {filteredInternships.length === 0 ? (
+        <p className="text-muted-foreground">No internships found.</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredInternships.map((internship) => (
+            <div
+              key={internship.id}
+              className="
+                rounded-xl border border-border bg-card
+                p-5 transition hover:shadow-lg
+              "
+            >
+              <h2 className="text-lg font-semibold">
+                {internship.title}
+              </h2>
+
+              <p className="text-sm text-muted-foreground">
+                {internship.company}
+              </p>
+
+              {/* Skills */}
+              <div className="mt-3 flex flex-wrap gap-2">
+                {internship.skills.map((skill) => (
+                  <span
+                    key={skill}
+                    className="rounded-full bg-muted px-2 py-1 text-xs"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+
+              {/* Deadline */}
+              <p className="mt-3 text-sm text-muted-foreground">
+                Deadline: {internship.deadline}
+              </p>
+
+              {/* Actions */}
+              <div className="mt-4 flex gap-2">
+                <Link
+                  href={`/internships/${internship.id}`}
+                  className="
+                    flex-1 rounded-md border border-border
+                    px-3 py-2 text-sm text-center hover:bg-muted
+                  "
+                >
+                  View Details
+                </Link>
+
+                <button
+                  onClick={() => {
+                    localStorage.setItem(
+                      "roadmap",
+                      `Roadmap for ${internship.title} will appear here`
+                    );
+                    window.location.href = "/roadmap";
+                  }}
+                  className="
+                    flex-1 rounded-md bg-primary px-3 py-2
+                    text-sm font-medium text-primary-foreground
+                    hover:opacity-90
+                  "
+                >
+                  Generate Roadmap
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
-  )
+  );
 }
