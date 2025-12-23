@@ -1,66 +1,98 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+type Internship = {
+  title: string;
+  company: string;
+  skills: string[];
+  deadline: string;
+};
 
 export default function RoadmapPage() {
-  const [roadmap, setRoadmap] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [internship, setInternship] = useState<Internship | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [roadmap, setRoadmap] = useState<string>("");
 
   useEffect(() => {
-    const internshipRaw = localStorage.getItem("selectedInternship");
-
-    if (!internshipRaw) {
-      setRoadmap("No internship selected.");
-      setLoading(false);
-      return;
+    const stored = localStorage.getItem("selectedInternship");
+    if (stored) {
+      setInternship(JSON.parse(stored));
     }
-
-    const internship = JSON.parse(internshipRaw);
-
-    const generateRoadmap = async () => {
-      try {
-        const res = await fetch("http://localhost:5000/api/ai/generate", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            internship,
-            userSkills: ["HTML", "CSS"], // later make dynamic
-          }),
-        });
-
-        const data = await res.json();
-
-        // ✅ correct path
-        setRoadmap(data.data.plan);
-      } catch (err) {
-        setRoadmap("Failed to generate roadmap.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    generateRoadmap();
   }, []);
 
+  const generateRoadmap = async () => {
+    if (!internship) return;
+
+    setLoading(true);
+    setError("");
+    setRoadmap("");
+
+    try {
+      const res = await fetch("http://localhost:5000/api/ai/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          internship: {
+            role: internship.title,
+            company: internship.company,
+            requiredSkills: internship.skills,
+            deadline: internship.deadline,
+          },
+          userSkills: ["HTML", "CSS"], // mock for now
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to generate");
+      }
+
+      const json = await res.json();
+
+      // 🔥 THIS WAS MISSING
+      setRoadmap(json.data.plan);
+    } catch (err) {
+      setError("Failed to generate roadmap");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!internship) {
+    return <p className="p-6">No internship selected</p>;
+  }
+
   return (
-    <div className="container mx-auto px-6 py-10 max-w-4xl">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">AI Generated Learning Roadmap</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <p>Generating roadmap...</p>
-          ) : (
-            <pre className="whitespace-pre-wrap bg-muted p-4 rounded-lg">
-              {roadmap}
-            </pre>
-          )}
-        </CardContent>
-      </Card>
+    <div className="p-6 max-w-3xl mx-auto">
+      <h1 className="text-3xl font-bold mb-1">
+        {internship.title}
+      </h1>
+      <p className="text-muted-foreground mb-4">
+        Deadline: {internship.deadline}
+      </p>
+
+      <button
+        onClick={generateRoadmap}
+        disabled={loading}
+        className="bg-primary text-primary-foreground px-4 py-2 rounded-md"
+      >
+        {loading ? "Generating..." : "Generate Roadmap"}
+      </button>
+
+      {error && (
+        <p className="mt-3 text-red-500">{error}</p>
+      )}
+
+      {/* 🔥 SHOW ROADMAP */}
+      {roadmap && (
+        <div className="mt-6 rounded-lg border border-border bg-card p-4 whitespace-pre-line">
+          <h2 className="text-xl font-semibold mb-2">
+            Learning Roadmap
+          </h2>
+          {roadmap}
+        </div>
+      )}
     </div>
   );
 }
