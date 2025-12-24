@@ -1,72 +1,132 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { internships } from "../mockInternships";
+import { generateRoadmap } from "@/lib/api";
+
+type RoadmapHistoryItem = {
+  roadmapId: string;
+  internshipId: string;
+  title: string;
+  roadmap: string;
+  generatedAt: string;
+};
+
+type AppliedInternship = {
+  id: string;
+  title: string;
+  company: string;
+  appliedAt: string;
+};
 
 export default function InternshipDetail() {
-  const { id } = useParams();
+  const params = useParams();
+  const id = params?.id?.toString();
+
   const internship = internships.find((i) => i.id === id);
 
-  const [loading, setLoading] = useState(false);
   const [roadmap, setRoadmap] = useState<string | null>(null);
-  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const [applied, setApplied] = useState(false);
+  const [error, setError] = useState("");
+
+  /* -------------------------------------------
+     Check applied status
+  --------------------------------------------*/
+  useEffect(() => {
+    if (!id) return;
+
+    const appliedList: AppliedInternship[] =
+      JSON.parse(localStorage.getItem("appliedInternships") || "[]");
+
+    setApplied(appliedList.some((i) => i.id === id));
+  }, [id]);
 
   if (!internship) {
     return <div className="p-6">Internship not found</div>;
   }
 
-  // 🔹 Generate Roadmap
-  async function handleGenerateRoadmap() {
+  /* -------------------------------------------
+     Generate Roadmap (FIXED)
+  --------------------------------------------*/
+  async function handleGenerate() {
     try {
       setLoading(true);
       setError("");
       setRoadmap(null);
 
-      const res = await fetch("http://localhost:5000/api/ai/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const res = await generateRoadmap({
+        internship: {
+          role: internship.title,
+          company: internship.company,
+          requiredSkills: internship.skills,
+          deadline: internship.deadline,
         },
-        body: JSON.stringify({
-          internship: {
-            role: internship.title,
-            company: internship.company,
-            requiredSkills: internship.skills,
-            deadline: internship.deadline,
-          },
-          userSkills: ["HTML", "CSS"], // later from user profile
-        }),
+        userSkills: ["HTML", "CSS"],
       });
 
-      const data = await res.json();
+      const planText = res?.data?.plan || "No roadmap generated";
+      setRoadmap(planText);
 
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to generate roadmap");
-      }
+      // ✅ FIXED: Save full roadmap with UNIQUE ID
+      const history: RoadmapHistoryItem[] =
+        JSON.parse(localStorage.getItem("generatedRoadmaps") || "[]");
 
-      setRoadmap(data.data.plan);
-    } catch (err: any) {
-      setError(err.message);
+      history.push({
+        roadmapId: crypto.randomUUID(), // ✅ REQUIRED
+        internshipId: internship.id,
+        title: internship.title,
+        roadmap: planText,
+        generatedAt: new Date().toISOString(),
+      });
+
+      localStorage.setItem(
+        "generatedRoadmaps",
+        JSON.stringify(history)
+      );
+    } catch (err) {
+      console.error(err);
+      setError("Failed to generate roadmap");
     } finally {
       setLoading(false);
     }
   }
 
-  // 🔹 Apply Internship
-  function handleApply() {
-    const appliedInternships =
+  /* -------------------------------------------
+     Apply / Cancel Application
+  --------------------------------------------*/
+  function handleApplyToggle() {
+    const appliedList: AppliedInternship[] =
       JSON.parse(localStorage.getItem("appliedInternships") || "[]");
 
-    localStorage.setItem(
-      "appliedInternships",
-      JSON.stringify([...appliedInternships, internship])
-    );
-
-    setApplied(true);
+    if (applied) {
+      const updated = appliedList.filter(
+        (i) => i.id !== internship.id
+      );
+      localStorage.setItem(
+        "appliedInternships",
+        JSON.stringify(updated)
+      );
+      setApplied(false);
+    } else {
+      appliedList.push({
+        id: internship.id,
+        title: internship.title,
+        company: internship.company,
+        appliedAt: new Date().toISOString(),
+      });
+      localStorage.setItem(
+        "appliedInternships",
+        JSON.stringify(appliedList)
+      );
+      setApplied(true);
+    }
   }
 
+  /* -------------------------------------------
+     UI
+  --------------------------------------------*/
   return (
     <div className="p-6 max-w-3xl">
       <h1 className="text-3xl font-bold">{internship.title}</h1>
@@ -74,40 +134,35 @@ export default function InternshipDetail() {
 
       <p className="mt-4">{internship.description}</p>
 
-      <div className="mt-4 space-y-1">
-        <p>📍 {internship.location}</p>
-        <p>💰 {internship.stipend}</p>
-        <p>⏳ Deadline: {internship.deadline}</p>
+      <div className="mt-3 space-y-1">
+        <p><b>Location:</b> {internship.location}</p>
+        <p><b>Stipend:</b> {internship.stipend}</p>
+        <p><b>Deadline:</b> {internship.deadline}</p>
       </div>
 
-      {/* Buttons */}
-      <div className="mt-6 flex gap-4">
+      <div className="mt-6 flex gap-3">
         <button
-          onClick={handleGenerateRoadmap}
+          onClick={handleGenerate}
           disabled={loading}
-          className="bg-blue-600 px-6 py-2 rounded text-white disabled:opacity-50"
+          className="bg-blue-600 px-6 py-2 rounded text-white"
         >
           {loading ? "Generating..." : "Generate Roadmap"}
         </button>
 
         <button
-          onClick={handleApply}
-          disabled={applied}
-          className="bg-green-600 px-6 py-2 rounded text-white disabled:opacity-50"
+          onClick={handleApplyToggle}
+          className={`px-6 py-2 rounded text-white ${
+            applied ? "bg-red-600" : "bg-green-600"
+          }`}
         >
-          {applied ? "Applied ✅" : "Apply"}
+          {applied ? "Cancel Application" : "Apply"}
         </button>
       </div>
 
-      {/* Error */}
-      {error && (
-        <p className="mt-4 text-red-500 font-medium">{error}</p>
-      )}
+      {error && <p className="text-red-500 mt-4">{error}</p>}
 
-      {/* Roadmap Output */}
       {roadmap && (
-        <div className="mt-6 bg-muted p-4 rounded-lg whitespace-pre-wrap">
-          <h2 className="font-semibold mb-2">📘 Your AI Roadmap</h2>
+        <div className="mt-6 bg-muted p-4 rounded whitespace-pre-wrap">
           {roadmap}
         </div>
       )}

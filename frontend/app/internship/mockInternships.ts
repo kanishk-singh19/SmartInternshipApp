@@ -1,5 +1,3 @@
-// app/internship/mockInternships.ts
-
 export type Internship = {
   id: string;
   title: string;
@@ -18,8 +16,7 @@ export const internships: Internship[] = [
     company: "Google",
     skills: ["React", "JavaScript", "Tailwind"],
     deadline: "2025-02-15",
-    description:
-      "Work on modern frontend applications using React and Tailwind.",
+    description: "Work on modern frontend applications.",
     location: "Remote",
     stipend: "₹30,000 / month",
   },
@@ -29,7 +26,7 @@ export const internships: Internship[] = [
     company: "Amazon",
     skills: ["Node.js", "Express", "MongoDB"],
     deadline: "2025-03-01",
-    description: "Build scalable backend APIs and services.",
+    description: "Build scalable backend APIs.",
     location: "Bangalore",
     stipend: "₹35,000 / month",
   },
@@ -39,8 +36,28 @@ export const internships: Internship[] = [
     company: "Microsoft",
     skills: ["React", "Node.js", "SQL"],
     deadline: "2025-02-28",
-    description: "Develop full stack features.",
+    description: "Develop end-to-end features.",
     location: "Hyderabad",
     stipend: "₹40,000 / month",
+  },
+  {
+    id: "4",
+    title: "AI / ML Intern",
+    company: "OpenAI",
+    skills: ["Python", "Machine Learning", "Deep Learning"],
+    deadline: "2025-03-10",
+    description: "Work on AI research and model training.",
+    location: "Remote",
+    stipend: "₹45,000 / month",
+  },
+  {
+    id: "5",
+    title: "Data Analyst Intern",
+    company: "Netflix",
+    skills: ["SQL", "Python", "Data Analysis"],
+    deadline: "2025-03-05",
+    description: "Analyze large datasets for insights.",
+    location: "Mumbai",
+    stipend: "₹28,000 / month",
   },
 ];

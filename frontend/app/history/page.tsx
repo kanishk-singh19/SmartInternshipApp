@@ -1,27 +1,48 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchHistory } from "@/lib/api";
+import { useRouter } from "next/navigation";
+
+const STORAGE_KEY = "generatedRoadmaps";
+
+type RoadmapHistoryItem = {
+  roadmapId: string;
+  title: string;
+  generatedAt: string;
+};
 
 export default function HistoryPage() {
-  const [history, setHistory] = useState([]);
+  const router = useRouter();
+  const [history, setHistory] = useState<RoadmapHistoryItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchHistory().then(setHistory);
+    const stored =
+      JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    setHistory(stored);
+    setLoading(false);
   }, []);
 
-  return (
-    <div className="p-6">
-      <h1 className="text-xl font-bold mb-4">Generated Roadmaps</h1>
+  if (loading) return <p className="p-6">Loading…</p>;
 
-      {history.map((item: any) => (
+  if (history.length === 0)
+    return <p className="p-6">No roadmaps generated</p>;
+
+  return (
+    <div className="p-6 max-w-3xl">
+      <h1 className="text-3xl font-bold mb-6">History</h1>
+
+      {history.map((item) => (
         <div
-          key={item._id}
-          className="bg-gray-900 p-4 rounded mb-3"
+          key={item.roadmapId}
+          onClick={() =>
+            router.push(`/roadmap/${item.roadmapId}`)
+          }
+          className="cursor-pointer border rounded-lg p-4 mb-3 hover:bg-muted"
         >
-          <p className="font-semibold">{item.targetRole}</p>
-          <p className="text-sm text-gray-400">
-            Deadline: {item.deadline}
+          <h2 className="font-semibold">{item.title}</h2>
+          <p className="text-sm text-muted-foreground">
+            {new Date(item.generatedAt).toLocaleString()}
           </p>
         </div>
       ))}
