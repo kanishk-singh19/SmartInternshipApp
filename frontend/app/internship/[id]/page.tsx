@@ -5,14 +5,6 @@ import { useEffect, useState } from "react";
 import { internships } from "../mockInternships";
 import { generateRoadmap } from "@/lib/api";
 
-type RoadmapHistoryItem = {
-  roadmapId: string;
-  internshipId: string;
-  title: string;
-  roadmap: string;
-  generatedAt: string;
-};
-
 type AppliedInternship = {
   id: string;
   title: string;
@@ -20,9 +12,15 @@ type AppliedInternship = {
   appliedAt: string;
 };
 
+type HistoryItem = {
+  internshipId: string;
+  title: string;
+  generatedAt: string;
+};
+
 export default function InternshipDetail() {
   const params = useParams();
-  const id = params?.id?.toString();
+  const id = params.id as string;
 
   const internship = internships.find((i) => i.id === id);
 
@@ -31,9 +29,9 @@ export default function InternshipDetail() {
   const [applied, setApplied] = useState(false);
   const [error, setError] = useState("");
 
-  /* -------------------------------------------
-     Check applied status
-  --------------------------------------------*/
+  /* -----------------------------------
+     Check applied status on load
+  ------------------------------------*/
   useEffect(() => {
     if (!id) return;
 
@@ -47,14 +45,13 @@ export default function InternshipDetail() {
     return <div className="p-6">Internship not found</div>;
   }
 
-  /* -------------------------------------------
-     Generate Roadmap (FIXED)
-  --------------------------------------------*/
+  /* -----------------------------------
+     Generate Roadmap + Save History
+  ------------------------------------*/
   async function handleGenerate() {
     try {
       setLoading(true);
       setError("");
-      setRoadmap(null);
 
       const res = await generateRoadmap({
         internship: {
@@ -66,67 +63,66 @@ export default function InternshipDetail() {
         userSkills: ["HTML", "CSS"],
       });
 
-      const planText = res?.data?.plan || "No roadmap generated";
-      setRoadmap(planText);
+      const plan = res?.data?.plan || "No roadmap generated";
+      setRoadmap(plan);
 
-      // ✅ FIXED: Save full roadmap with UNIQUE ID
-      const history: RoadmapHistoryItem[] =
-        JSON.parse(localStorage.getItem("generatedRoadmaps") || "[]");
+      // ✅ SAVE TO HISTORY
+      const history: HistoryItem[] =
+        JSON.parse(localStorage.getItem("history") || "[]");
 
-      history.push({
-        roadmapId: crypto.randomUUID(), // ✅ REQUIRED
-        internshipId: internship.id,
-        title: internship.title,
-        roadmap: planText,
-        generatedAt: new Date().toISOString(),
-      });
-
-      localStorage.setItem(
-        "generatedRoadmaps",
-        JSON.stringify(history)
+      const alreadyExists = history.some(
+        (h) => h.internshipId === internship.id
       );
-    } catch (err) {
-      console.error(err);
+
+      if (!alreadyExists) {
+        history.push({
+          internshipId: internship.id,
+          title: internship.title,
+          generatedAt: new Date().toISOString(),
+        });
+
+        localStorage.setItem("history", JSON.stringify(history));
+      }
+    } catch {
       setError("Failed to generate roadmap");
     } finally {
       setLoading(false);
     }
   }
 
-  /* -------------------------------------------
+  /* -----------------------------------
      Apply / Cancel Application
-  --------------------------------------------*/
+  ------------------------------------*/
   function handleApplyToggle() {
     const appliedList: AppliedInternship[] =
       JSON.parse(localStorage.getItem("appliedInternships") || "[]");
 
     if (applied) {
-      const updated = appliedList.filter(
-        (i) => i.id !== internship.id
-      );
-      localStorage.setItem(
-        "appliedInternships",
-        JSON.stringify(updated)
-      );
+      // ❌ Cancel
+      const updated = appliedList.filter((i) => i.id !== id);
+      localStorage.setItem("appliedInternships", JSON.stringify(updated));
       setApplied(false);
     } else {
+      // ✅ Apply
       appliedList.push({
         id: internship.id,
         title: internship.title,
         company: internship.company,
         appliedAt: new Date().toISOString(),
       });
+
       localStorage.setItem(
         "appliedInternships",
         JSON.stringify(appliedList)
       );
+
       setApplied(true);
     }
   }
 
-  /* -------------------------------------------
+  /* -----------------------------------
      UI
-  --------------------------------------------*/
+  ------------------------------------*/
   return (
     <div className="p-6 max-w-3xl">
       <h1 className="text-3xl font-bold">{internship.title}</h1>
@@ -140,11 +136,12 @@ export default function InternshipDetail() {
         <p><b>Deadline:</b> {internship.deadline}</p>
       </div>
 
+      {/* Actions */}
       <div className="mt-6 flex gap-3">
         <button
           onClick={handleGenerate}
           disabled={loading}
-          className="bg-blue-600 px-6 py-2 rounded text-white"
+          className="bg-blue-600 px-6 py-2 rounded text-white disabled:opacity-50"
         >
           {loading ? "Generating..." : "Generate Roadmap"}
         </button>
