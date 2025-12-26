@@ -1,17 +1,26 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
-const AIPlanSchema = new mongoose.Schema(
+const AIPlanSchema = new Schema(
   {
+    // 🔑 Link roadmap to logged-in user
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+
     internship: {
       role: { type: String, required: true },
-      company: String,
+      company: { type: String },
       requiredSkills: { type: [String], required: true },
       deadline: { type: String, required: true },
     },
+
     userSkills: {
       type: [String],
       required: true,
     },
+
     plan: {
       type: String,
       required: true,
