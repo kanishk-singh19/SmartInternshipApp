@@ -4,9 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/authContext";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export default function SignupPage() {
   const router = useRouter();
-  const { signup } = useAuth();
+  const { login } = useAuth(); // ✅ use login, NOT signup
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -22,16 +24,34 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      await signup({
-        name,
-        email,
-        password,
-        role,
+      const res = await fetch(`${API_URL}/auth/signup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          role,
+        }),
       });
 
-      router.push("/dashboard");
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Signup failed");
+      }
+
+      // ✅ Auto-login after signup
+      login({
+        token: data.token,
+        user: data.user,
+      });
+
+      router.push("/Dashboard");
     } catch (err: any) {
-      setError(err?.message || "Signup failed");
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -57,7 +77,6 @@ export default function SignupPage() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Name */}
           <div>
             <label className="block text-sm mb-1">Full Name</label>
             <input
@@ -65,12 +84,10 @@ export default function SignupPage() {
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="John Doe"
-              className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full rounded-lg border border-border bg-background px-4 py-2"
             />
           </div>
 
-          {/* Email */}
           <div>
             <label className="block text-sm mb-1">Email</label>
             <input
@@ -78,12 +95,10 @@ export default function SignupPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full rounded-lg border border-border bg-background px-4 py-2"
             />
           </div>
 
-          {/* Password */}
           <div>
             <label className="block text-sm mb-1">Password</label>
             <input
@@ -91,12 +106,10 @@ export default function SignupPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full rounded-lg border border-border bg-background px-4 py-2"
             />
           </div>
 
-          {/* Role */}
           <div>
             <label className="block text-sm mb-1">I am a</label>
             <select
@@ -104,24 +117,22 @@ export default function SignupPage() {
               onChange={(e) =>
                 setRole(e.target.value as "student" | "recruiter")
               }
-              className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full rounded-lg border border-border bg-background px-4 py-2"
             >
               <option value="student">Student / Internship Seeker</option>
               <option value="recruiter">Recruiter / Company</option>
             </select>
           </div>
 
-          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-primary py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-60"
+            className="w-full rounded-lg bg-primary py-2 font-semibold text-primary-foreground"
           >
             {loading ? "Creating account..." : "Create Account"}
           </button>
         </form>
 
-        {/* Footer */}
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Already have an account?{" "}
           <button

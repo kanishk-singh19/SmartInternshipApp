@@ -101,9 +101,11 @@ export function DropdownMenuSeparator() {
 export function DropdownMenuItem({
   children,
   onClick,
+  className,
 }: {
   children: React.ReactNode;
   onClick?: () => void;
+  className?: string;
 }) {
   const ctx = React.useContext(DropdownContext);
 
@@ -113,7 +115,7 @@ export function DropdownMenuItem({
         onClick?.();
         ctx?.setOpen(false); // 👈 CLOSE on click
       }}
-      className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-2 hover:bg-muted"
+      className={`flex cursor-pointer items-center gap-2 rounded-md px-2 py-2 hover:bg-muted ${className ?? ""}`}
     >
       {children}
     </div>

@@ -20,79 +20,65 @@ export default function LoginPage() {
 
     try {
       await login(email, password);
-      router.push("/dashboard");
+      router.push("/Dashboard");
     } catch (err: any) {
-      setError(err?.message || "Invalid credentials");
+      setError(err.message || "Invalid credentials");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-xl">
-        {/* Header */}
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold">Welcome Back 👋</h1>
-          <p className="text-sm text-muted-foreground mt-2">
-            Login to continue planning your internships
-          </p>
-        </div>
+    <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="w-full max-w-md rounded-xl border p-8 bg-card">
+        <h1 className="text-2xl font-bold text-center mb-2">
+          Welcome Back 👋
+        </h1>
+        <p className="text-center text-sm text-muted-foreground mb-6">
+          Login to continue
+        </p>
 
-        {/* Error */}
         {error && (
-          <div className="mb-4 rounded-lg bg-red-500/10 px-4 py-2 text-sm text-red-500">
+          <div className="mb-4 text-red-500 text-sm bg-red-500/10 p-2 rounded">
             {error}
           </div>
         )}
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Email */}
-          <div>
-            <label className="block text-sm mb-1">Email</label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            required
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full p-2 rounded bg-background border"
+          />
 
-          {/* Password */}
-          <div>
-            <label className="block text-sm mb-1">Password</label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            required
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full p-2 rounded bg-background border"
+          />
 
-          {/* Submit */}
           <button
-            type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-primary py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-60"
+            className="w-full bg-primary text-primary-foreground p-2 rounded font-semibold"
           >
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
-        {/* Footer */}
-        <p className="mt-6 text-center text-sm text-muted-foreground">
+        <p className="text-center text-sm mt-4">
           Don’t have an account?{" "}
-          <button
+          <span
             onClick={() => router.push("/signup")}
-            className="text-primary hover:underline"
+            className="text-primary cursor-pointer"
           >
             Sign up
-          </button>
+          </span>
         </p>
       </div>
     </div>

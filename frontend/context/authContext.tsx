@@ -3,17 +3,26 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+const API = process.env.NEXT_PUBLIC_API_URL;
+
 type User = {
   id: string;
   name: string;
   email: string;
-  role: string;
+  role: "student" | "recruiter";
 };
 
 type AuthContextType = {
   user: User | null;
   token: string | null;
-  login: (data: { token: string; user: User }) => void;
+  // Accept either (email, password) or a payload { token, user }
+  login: (emailOrPayload: string | { token: string; user: User }, password?: string) => Promise<void> | void;
+  signup: (data: {
+    name: string;
+    email: string;
+    password: string;
+    role: "student" | "recruiter";
+  }) => Promise<void>;
   logout: () => void;
 };
 
@@ -33,11 +42,54 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, []);
 
-  const login = (data: { token: string; user: User }) => {
+  const login = async (emailOrPayload: string | { token: string; user: User }, password?: string) => {
+    // If called with (email, password)
+    if (typeof emailOrPayload === "string") {
+      const res = await fetch(`${API}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: emailOrPayload, password }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || "Login failed");
+      }
+
+      const data = await res.json();
+      setUser(data.user);
+      setToken(data.token);
+      localStorage.setItem("auth", JSON.stringify(data));
+      return;
+    }
+
+    // Otherwise accept a payload directly (used after signup or SSR)
+    setUser(emailOrPayload.user);
+    setToken(emailOrPayload.token);
+    localStorage.setItem("auth", JSON.stringify({ token: emailOrPayload.token, user: emailOrPayload.user }));
+  };
+
+  const signup = async (form: {
+    name: string;
+    email: string;
+    password: string;
+    role: "student" | "recruiter";
+  }) => {
+    const res = await fetch(`${API}/auth/signup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || "Signup failed");
+    }
+
+    const data = await res.json();
     setUser(data.user);
     setToken(data.token);
     localStorage.setItem("auth", JSON.stringify(data));
-    router.push("/Dashboard");
   };
 
   const logout = () => {
@@ -48,7 +100,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={{ user, token, login, signup, logout }}>
       {children}
     </AuthContext.Provider>
   );
