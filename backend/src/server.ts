@@ -4,7 +4,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 
 import aiRoutes from "./routes/aiRoutes";
-import { authRoutes } from "./routes/authRoutes";
+import authRoutes from "./routes/authRoutes";
+import internshipRoutes from "./routes/internshipRoutes";
 
 dotenv.config();
 
@@ -16,13 +17,14 @@ app.use(cors());
 app.use(express.json());
 
 /* -------------------- Test Route -------------------- */
-app.get("/", (req: Request, res: Response) => {
+app.get("/", (_req: Request, res: Response) => {
   res.send("Server is running!");
 });
 
 /* -------------------- Routes -------------------- */
 app.use("/api/auth", authRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/internships", internshipRoutes);
 
 /* -------------------- MongoDB -------------------- */
 mongoose

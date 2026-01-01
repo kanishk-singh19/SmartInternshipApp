@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
-// Strongly type the document so methods like `matchPassword` are known to TS
 export interface AuthUserDocument extends mongoose.Document {
   name: string;
   email: string;
@@ -24,11 +23,10 @@ const AuthUserSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Use `any` for `next` to avoid mismatched Mongoose typings for hook callbacks
-AuthUserSchema.pre("save", async function (this: any, next: any) {
-  if (!this.isModified("password")) return next();
+/* ✅ FIXED PRE-SAVE HOOK (NO next()) */
+AuthUserSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
   this.password = await bcrypt.hash(this.password, 10);
-  next();
 });
 
 AuthUserSchema.methods.matchPassword = function (entered: string) {

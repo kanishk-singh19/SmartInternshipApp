@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import User from "../models/AuthUser";
+import AuthUser from "../models/AuthUser";
 
 
 const generateToken = (id: string) => {
@@ -18,12 +18,12 @@ export const signup = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "All fields required" });
     }
 
-    const exists = await User.findOne({ email });
+    const exists = await AuthUser.findOne({ email });
     if (exists) {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    const user = await User.create({
+    const user = await AuthUser.create({
       name,
       email,
       password,
@@ -40,10 +40,13 @@ export const signup = async (req: Request, res: Response) => {
         role: user.role,
       },
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Signup failed" });
-  }
+  } catch (err: any) {
+  console.error("SIGNUP ERROR 👉", err.message || err);
+  res.status(500).json({
+    message: err.message || "Signup failed",
+  });
+}
+
 };
 
 // LOGIN
@@ -51,7 +54,7 @@ export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    const user = await AuthUser.findOne({ email });
 
     if (!user || !(await user.matchPassword(password))) {
       return res.status(401).json({ message: "Invalid credentials" });
